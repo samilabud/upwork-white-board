@@ -33,6 +33,8 @@ import ZoomOutIcon from './../images/zoom-out.svg';
 import DownloadIcon from './../images/download.svg';
 import UploadIcon from './../images/add-photo.svg';
 import FillIcon from './../images/color-fill.svg';
+import UndoIcon from './../images/undo.svg';
+import RedoIcon from './../images/redo.svg';
 
 const initFileInfo = {
   file: { name: 'whiteboard' },
@@ -108,6 +110,8 @@ const Whiteboard = ({
         SAVE_AS_IMAGE: true,
         GO_TO_START: true,
         ZOOM: true,
+        UNDO: true,
+        REDO: true,
 
         ...controls,
       };
@@ -411,6 +415,18 @@ const Whiteboard = ({
           {!!enabledControls.CLEAR && (
             <ButtonS type="button" onClick={() => board.clearCanvas()}>
               <img src={DeleteIcon} alt="Delete" />
+            </ButtonS>
+          )}
+
+          {!!enabledControls.UNDO && (
+            <ButtonS type="button" onClick={() => board.undo()}>
+              <img src={UndoIcon} alt="Undo" />
+            </ButtonS>
+          )}
+
+          {!!enabledControls.REDO && (
+            <ButtonS type="button" onClick={() => board.redo()}>
+              <img src={RedoIcon} alt="Redo" />
             </ButtonS>
           )}
 

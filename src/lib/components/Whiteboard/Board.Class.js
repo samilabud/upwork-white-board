@@ -26,6 +26,8 @@ export class Board {
     maxZoom: 9.99,
     viewportTransform: [1, 0, 0, 1, 0, 0],
   };
+  canvasState = [];
+  currentState = -1;
 
   constructor(params) {
     if (params) {
@@ -41,6 +43,8 @@ export class Board {
     this.resetZoom();
     this.setDrawingMode(this.drawingSettings.currentMode);
     this.addZoomListeners();
+    this.canvasState = [];
+    this.currentState = -1;
   }
 
   initCanvas() {
@@ -68,7 +72,6 @@ export class Board {
       this.element = this.handleResize(this.resizeCanvas(canvas, parentElement).bind(this));
       this.element.observe(parentElement);
     }
-
     return canvas;
   }
 
@@ -84,9 +87,11 @@ export class Board {
       this.canvas.viewportTransform = this.canvasConfig.viewportTransform;
       this.changeZoom({ scale: 1 });
     }
+
+    this.saveCanvasState();
     this.canvas.requestRenderAll();
     console.log(this.canvas.getObjects());
-    this.canvas.fire('config:chnage');
+    this.canvas.fire('config:change');
   }
 
   addZoomListeners() {
@@ -186,7 +191,6 @@ export class Board {
 
   setCanvasConfig(canvasConfig) {
     if (!canvasConfig) return;
-
     this.applyCanvasConfig(canvasConfig);
   }
 
@@ -261,6 +265,8 @@ export class Board {
       // const scale = width / canvas.getWidth();
       // const zoom = canvas.getZoom() * scale;
       canvas.setDimensions({ width: width, height: height });
+
+      this.saveCanvasState();
       // canvas.setViewportTransform([zoom, 0, 0, zoom, 0, 0]);
     };
   }
@@ -281,6 +287,7 @@ export class Board {
     canvas.freeDrawingBrush.color = drawingSettings.currentColor;
     canvas.isDrawingMode = true;
     canvas.freeDrawingCursor = this.cursorPencil;
+    canvas.on('mouse:up', this.stopDrawing.bind(this));
   }
 
   createLine() {
@@ -402,6 +409,7 @@ export class Board {
 
   stopDrawing() {
     this.mouseDown = false;
+    this.saveCanvasState();
   }
 
   createEllipse() {
@@ -537,6 +545,8 @@ export class Board {
     canvas.on('mouse:down', (e) => this.addText.call(this, e));
 
     canvas.isDrawingMode = false;
+
+    this.saveCanvasState();
   }
 
   addText(e) {
@@ -580,6 +590,8 @@ export class Board {
         }
       }.bind(this),
     );
+
+    this.saveCanvasState();
   }
 
   eraserOn() {
@@ -616,6 +628,7 @@ export class Board {
           opacity: 1,
         });
         canvas.requestRenderAll();
+        this.saveCanvasState();
       }
     });
 
@@ -641,6 +654,7 @@ export class Board {
       }
     });
     canvas.setBackgroundImage(null, canvas.renderAll.bind(canvas));
+    this.saveCanvasState();
   }
 
   changeZoom({ point, scale }) {
@@ -729,6 +743,29 @@ export class Board {
     }
     this.canvas = null;
   }
+
+  saveCanvasState() {
+    this.currentState++;
+    this.canvasState[this.currentState] = JSON.stringify(this.canvas);
+    this.canvasState = this.canvasState.slice(0, this.currentState + 1);
+  }
+
+  undo() {
+    if (this.currentState > 0) {
+        this.currentState--;
+        this.canvas.loadFromJSON(this.canvasState[this.currentState], this.canvas.renderAll.bind(this.canvas));
+        this.canvas.requestRenderAll();
+    }
+  }
+
+  redo() {
+      if (this.currentState < this.canvasState.length - 1) {
+          this.currentState++;
+          this.canvas.loadFromJSON(this.canvasState[this.currentState], this.canvas.renderAll.bind(this.canvas));
+          this.canvas.requestRenderAll();
+      }
+  }
+
 
   // function drawBackground(canvas) {
   //   const dotSize = 4; // Adjust the size of the dots as needed
