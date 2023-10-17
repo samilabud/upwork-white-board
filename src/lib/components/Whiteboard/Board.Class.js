@@ -634,8 +634,6 @@ export class Board {
 
     canvas.defaultCursor = getCursor('eraser');
     canvas.hoverCursor = getCursor('eraser');
-
-    this.saveCanvasState();
   }
 
   onSelectMode() {
