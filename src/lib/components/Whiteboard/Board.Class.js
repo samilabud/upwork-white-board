@@ -602,18 +602,19 @@ export class Board {
       canvas.remove(event.target);
 
       canvas.on('mouse:move', (e) => {
-        canvas.remove(e.target);
+        if(e.target && e.target.opacity===0.2){
+          canvas.remove(e.target);
+          this.saveCanvasState()
+        }
       });
     });
 
     canvas.on('mouse:up', () => {
       canvas.off('mouse:move');
-      this.saveCanvasState();
     });
 
     canvas.on('mouse:over', (event) => {
       const hoveredObject = event.target;
-      console.log(hoveredObject);
       if (hoveredObject) {
         hoveredObject.set({
           opacity: 0.2,
