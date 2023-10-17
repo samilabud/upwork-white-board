@@ -629,7 +629,6 @@ export class Board {
           opacity: 1,
         });
         canvas.requestRenderAll();
-        this.saveCanvasState();
       }
     });
 
