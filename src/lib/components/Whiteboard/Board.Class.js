@@ -608,6 +608,7 @@ export class Board {
 
     canvas.on('mouse:up', () => {
       canvas.off('mouse:move');
+      this.saveCanvasState();
     });
 
     canvas.on('mouse:over', (event) => {
@@ -634,6 +635,8 @@ export class Board {
 
     canvas.defaultCursor = getCursor('eraser');
     canvas.hoverCursor = getCursor('eraser');
+
+    this.saveCanvasState();
   }
 
   onSelectMode() {
