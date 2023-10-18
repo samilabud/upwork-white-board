@@ -599,14 +599,17 @@ export class Board {
     canvas.isDrawingMode = false;
 
     canvas.on('mouse:down', (event) => {
-      canvas.remove(event.target);
-
-      canvas.on('mouse:move', (e) => {
-        if(e.target && e.target.opacity===0.2){
-          canvas.remove(e.target);
-          this.saveCanvasState()
-        }
-      });
+      if(event.target){
+        canvas.remove(event.target);
+        canvas.remove(event.target);this.saveCanvasState();
+      }else{
+        canvas.on('mouse:move', (e) => {
+          if(e.target && e.target.opacity===0.2){
+            canvas.remove(e.target);
+            this.saveCanvasState()
+          }
+        });
+      }
     });
 
     canvas.on('mouse:up', () => {
