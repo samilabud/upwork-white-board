@@ -114,41 +114,11 @@ export class Board {
         vpt[4] -= e.deltaX;
         vpt[5] -= e.deltaY;
 
-        // const boundaries = that.getCanvasContentBoundaries();
-
-        // let scrolledX = vpt[4] + e.deltaX;
-        // let scrolledY = vpt[5] + e.deltaY;
-        // console.log('scrolled', scrolledX, scrolledY);
-        // console.log('boundaries', boundaries);
-
-        // const offset = 50;
-
-        // scrolledX =
-        //   scrolledX < -boundaries.maxX + offset
-        //     ? -boundaries.maxX + offset
-        //     : -scrolledX < boundaries.minX - canvas.width + offset
-        //     ? canvas.width - boundaries.minX - offset
-        //     : scrolledX;
-        // scrolledY =
-        //   scrolledY < -boundaries.maxY + offset
-        //     ? -boundaries.maxY + offset
-        //     : -scrolledY < boundaries.minY - canvas.height + offset
-        //     ? canvas.height - boundaries.minY - offset
-        //     : scrolledY;
-
-        // that.throttle(() => console.log('after', scrolledX, scrolledY));
-
-        // vpt[4] = scrolledX;
-        // vpt[5] = scrolledY;
-
-        // console.log(vpt);
-
         canvas.requestRenderAll();
       }
     });
 
     canvas.on('touch:gesture', (event) => {
-      console.log('1 touch:gesture');
       if (event.e.touches && event.e.touches.length === 2) {
         const point1 = {
           x: event.e.touches[0].clientX,
@@ -159,10 +129,9 @@ export class Board {
           y: event.e.touches[1].clientY,
         };
 
-        const prevDistance = canvas.getPointerDistance(point1, point2);
+        let prevDistance = canvas.getPointerDistance(point1, point2);
 
         canvas.on('touch:gesture', (event) => {
-          console.log('2 touch:gesture');
           const newDistance = canvas.getPointerDistance(point1, point2);
           const zoom = newDistance / prevDistance;
 
@@ -262,12 +231,9 @@ export class Board {
       const width = whiteboard.clientWidth;
       const height = whiteboard.clientHeight;
       this.changeZoom({ scale: 1 });
-      // const scale = width / canvas.getWidth();
-      // const zoom = canvas.getZoom() * scale;
       canvas.setDimensions({ width: width, height: height });
 
       this.saveCanvasState();
-      // canvas.setViewportTransform([zoom, 0, 0, zoom, 0, 0]);
     };
   }
 
@@ -599,14 +565,15 @@ export class Board {
     canvas.isDrawingMode = false;
 
     canvas.on('mouse:down', (event) => {
-      if(event.target){
+      if (event.target) {
         canvas.remove(event.target);
-        canvas.remove(event.target);this.saveCanvasState();
-      }else{
+        canvas.remove(event.target);
+        this.saveCanvasState();
+      } else {
         canvas.on('mouse:move', (e) => {
-          if(e.target && e.target.opacity===0.2){
+          if (e.target && e.target.opacity === 0.2) {
             canvas.remove(e.target);
-            this.saveCanvasState()
+            this.saveCanvasState();
           }
         });
       }
@@ -756,20 +723,25 @@ export class Board {
 
   undo() {
     if (this.currentState > 0) {
-        this.currentState--;
-        this.canvas.loadFromJSON(this.canvasState[this.currentState], this.canvas.renderAll.bind(this.canvas));
-        this.canvas.requestRenderAll();
+      this.currentState--;
+      this.canvas.loadFromJSON(
+        this.canvasState[this.currentState],
+        this.canvas.renderAll.bind(this.canvas),
+      );
+      this.canvas.requestRenderAll();
     }
   }
 
   redo() {
-      if (this.currentState < this.canvasState.length - 1) {
-          this.currentState++;
-          this.canvas.loadFromJSON(this.canvasState[this.currentState], this.canvas.renderAll.bind(this.canvas));
-          this.canvas.requestRenderAll();
-      }
+    if (this.currentState < this.canvasState.length - 1) {
+      this.currentState++;
+      this.canvas.loadFromJSON(
+        this.canvasState[this.currentState],
+        this.canvas.renderAll.bind(this.canvas),
+      );
+      this.canvas.requestRenderAll();
+    }
   }
-
 
   // function drawBackground(canvas) {
   //   const dotSize = 4; // Adjust the size of the dots as needed
@@ -785,18 +757,18 @@ export class Board {
 
   //   return new Promise((resolve) => {
   //     const dotImage = new Image();
-  //     dotImage.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(dotSvg);
+  //     dotImage.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(dotSvg);
   //     dotImage.onload = function () {
   //       const dotPattern = new fabric.Pattern({
   //         source: dotImage,
-  //         repeat: 'repeat', // Adjust the repeat property to change the pattern repetition
+  //         repeat: "repeat", // Adjust the repeat property to change the pattern repetition
   //       });
 
   //       const width = canvas.getWidth();
   //       const height = canvas.getHeight();
 
   //       const rect = new fabric.Rect({
-  //         itemId: 'background-id-rectangle',
+  //         itemId: "background-id-rectangle",
   //         width: width,
   //         height: height,
   //         fill: dotPattern,

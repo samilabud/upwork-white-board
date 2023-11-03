@@ -144,7 +144,7 @@ const Whiteboard = ({
 
     setBoard(newBoard);
     addListeners(newBoard.canvas);
-
+    console.count()
     return () => {
       if (board) {
         board.removeBoard();
@@ -189,6 +189,7 @@ const Whiteboard = ({
       fabric.Image.fromURL(reader.result, (img) => {
         img.scaleToHeight(board.canvas.height);
         board.canvas.add(img);
+        board.saveCanvasState();
       });
     });
 
@@ -299,6 +300,7 @@ const Whiteboard = ({
       updateFileReaderInfo({ file: event.target.files[0], currentPageNumber: 1 });
       onPDFUploaded(event.target.files[0], event, board.canvas);
     }
+    board.saveCanvasState();
   }
 
   function getPageJSON({ fileName, pageNumber }) {
