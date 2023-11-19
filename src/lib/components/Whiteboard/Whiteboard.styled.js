@@ -3,8 +3,39 @@ import theme from '../../theme';
 
 const color = theme.color;
 
-export const WhiteBoardS = styled.div`
+export const WrapperS = styled.div`
   font-family: Arial, Helvetica, sans-serif;
+  position: relative;
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  min-width: 100%;
+  min-height: 100%;
+`;
+
+export const TabsS = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  box-shadow: inset 0px -10px 10px -8px rgba(0, 0, 0, 0.2);
+`;
+
+export const TabS = styled.div`
+  display: flex;
+  height: 2em;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 0.5em 1em;
+  border-right: 1px solid rgba(0, 0, 0, 0.1);
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+`;
+
+export const WhiteBoardS = styled.div`
   position: relative;
   flex: 1;
   width: 100%;
@@ -65,7 +96,7 @@ export const ToolbarS = styled.div`
   align-items: center;
   background: white;
   box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
-  z-index: 1;
+  z-index: 2;
 `;
 
 export const ColorBarS = styled.div`
@@ -83,7 +114,7 @@ export const ColorBarS = styled.div`
   align-items: center;
   background: white;
   box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
-  z-index: 1;
+  z-index: 2;
 
   > button {
     transform: rotate(-90deg);
@@ -104,7 +135,7 @@ export const ZoomBarS = styled.div`
   align-items: center;
   background: white;
   box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
-  z-index: 1;
+  z-index: 2;
 `;
 
 export const ToolbarHolderS = styled.div`
@@ -118,11 +149,13 @@ export const ToolbarHolderS = styled.div`
 
 export const PDFWrapperS = styled.div`
   position: absolute;
+  top: 50px;
   bottom: 0;
   width: 100%;
 `;
 
 export const ColorButtonS = styled.button`
+  z-index: 2;
   display: flex;
   justify-content: center;
   align-items: center;

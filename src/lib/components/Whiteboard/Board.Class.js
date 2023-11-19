@@ -26,11 +26,38 @@ export class Board {
     maxZoom: 9.99,
     viewportTransform: [1, 0, 0, 1, 0, 0],
   };
+
+  // [Sketch range limits]
+  nowX = 0;
+  nowY = 0;
+  canvasRef;
+  limitScale = 10;
+  sketchWidthLimit = 1920 * this.limitScale;
+  sketchHeightLimit = 1080 * this.limitScale;
   canvasState = [];
   currentState = -1;
 
   constructor(params) {
+    // [Sketch range limits]
+    const windowWidth =
+      this.limitScale *
+      (window.screen.width ||
+        window.innerWidth ||
+        document.documentElement.clientWidth ||
+        document.body.clientWidth);
+    const windowHeight =
+      this.limitScale *
+      (window.screen.height ||
+        window.innerHeight ||
+        document.documentElement.clientHeight ||
+        document.body.clientHeight);
+    this.sketchWidthLimit =
+      windowWidth > this.sketchWidthLimit ? windowWidth : this.sketchWidthLimit;
+    this.sketchHeightLimit =
+      windowHeight > this.sketchHeightLimit ? windowHeight : this.sketchHeightLimit;
+
     if (params) {
+      this.canvasRef = params.canvasRef;
       this.drawingSettings = params.drawingSettings;
     }
     this.canvas = this.initCanvas(this.canvasConfig);
@@ -94,7 +121,7 @@ export class Board {
     this.canvas.fire('config:change');
   }
 
-  addZoomListeners() {
+  addZoomListeners(params) {
     const canvas = this.canvas;
     const that = this;
     canvas.off('mouse:wheel');
@@ -113,6 +140,48 @@ export class Board {
         let vpt = canvas.viewportTransform;
         vpt[4] -= e.deltaX;
         vpt[5] -= e.deltaY;
+
+        try {
+          // [Sketch range limits]
+          const scale = params ? params.scale : 1;
+          vpt[4] = that.axisLimit({ scale, vpt: vpt[4], axis: 'x' });
+          vpt[5] = that.axisLimit({ scale, vpt: vpt[5], axis: 'y' });
+
+          // x, y coordinates used to zoom out the screen at the end of the wall (To prevent the screen from going beyond the border of the transparent wall I set when reducing the screen)
+          that.nowX = vpt[4];
+          that.nowY = vpt[5];
+        } catch (error) {
+          console.log(error);
+        }
+
+        // const boundaries = that.getCanvasContentBoundaries();
+
+        // let scrolledX = vpt[4] + e.deltaX;
+        // let scrolledY = vpt[5] + e.deltaY;
+        // console.log('scrolled', scrolledX, scrolledY);
+        // console.log('boundaries', boundaries);
+
+        // const offset = 50;
+
+        // scrolledX =
+        //   scrolledX < -boundaries.maxX + offset
+        //     ? -boundaries.maxX + offset
+        //     : -scrolledX < boundaries.minX - canvas.width + offset
+        //     ? canvas.width - boundaries.minX - offset
+        //     : scrolledX;
+        // scrolledY =
+        //   scrolledY < -boundaries.maxY + offset
+        //     ? -boundaries.maxY + offset
+        //     : -scrolledY < boundaries.minY - canvas.height + offset
+        //     ? canvas.height - boundaries.minY - offset
+        //     : scrolledY;
+
+        // that.throttle(() => console.log('after', scrolledX, scrolledY));
+
+        // vpt[4] = scrolledX;
+        // vpt[5] = scrolledY;
+
+        // console.log(vpt);
 
         canvas.requestRenderAll();
       }
@@ -149,6 +218,41 @@ export class Board {
         });
       }
     });
+  }
+
+  // [Sketch range limits]
+  axisLimit({ scale, vpt, axis }) {
+    let result = vpt;
+    const containerElement = this.canvasRef.current;
+    if (!containerElement) {
+      return vpt;
+    }
+
+    // Determined by whether it is the x-axis or y-axis
+    const containerSize =
+      axis === 'x' ? containerElement.offsetWidth : containerElement.offsetHeight;
+    const addScroll = axis === 'x' ? this.sketchWidthLimit : this.sketchHeightLimit;
+
+    // Range adjustment when zooming in/out
+    const zoomInMinusValue = containerSize * scale - containerSize;
+    const zoomOutPlusValue = containerSize * (1 - scale);
+
+    // left || top
+    if (result > addScroll * scale) {
+      result = addScroll * scale;
+    }
+
+    // zoom in && right || zoom in && bottom
+    else if (scale >= 1 && result < -(addScroll * scale) - zoomInMinusValue) {
+      result = -(addScroll * scale) - zoomInMinusValue;
+    }
+
+    // zoom out && right || zoom out && bottom
+    else if (scale < 1 && result < -(addScroll * scale) + zoomOutPlusValue) {
+      result = -(addScroll * scale) + zoomOutPlusValue;
+    }
+
+    return result;
   }
 
   setDrawingSettings(drawingSettings) {
@@ -612,6 +716,7 @@ export class Board {
     const drawingSettings = this.drawingSettings;
     drawingSettings.currentMode = '';
     canvas.isDrawingMode = false;
+    canvas.selection = true;
 
     canvas.getObjects().map((item) => item.set({ selectable: true }));
     canvas.hoverCursor = 'all-scroll';
@@ -643,6 +748,13 @@ export class Board {
 
     this.canvas.zoomToPoint(point, scale);
     this.onZoom({ point, scale });
+
+    // [Sketch range limits] Modified so that when the screen is reduced while reaching the end of the wall, it does not go beyond the border of the transparent wall that I set.
+    if (scale < 1) {
+      const newVpt = this.canvas.viewportTransform;
+      newVpt[4] = this.axisLimit({ scale, vpt: this.nowX, axis: 'x' });
+      newVpt[5] = this.axisLimit({ scale, vpt: this.nowY, axis: 'y' });
+    }
   }
 
   resetZoom() {
@@ -655,7 +767,7 @@ export class Board {
   }
 
   onZoom(params) {
-    this.addZoomListeners();
+    this.addZoomListeners(params);
     this.canvas.fire('zoom:change', params);
   }
 
