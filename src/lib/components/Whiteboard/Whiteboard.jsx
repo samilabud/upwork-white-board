@@ -157,7 +157,6 @@ const Whiteboard = ({
 
     setBoard(newBoard);
     addListeners(newBoard.canvas);
-    console.count()
     return () => {
       if (board) {
         board.removeBoard();
@@ -170,13 +169,6 @@ const Whiteboard = ({
 
     board.setDrawingSettings(canvasDrawingSettings);
   }, [canvasDrawingSettings, board]);
-
-  // useEffect(() => {
-  //   if (!board || !canvasConfig) return;
-
-  //   board.setCanvasConfig(canvasConfig);
-  //   onConfigChange(canvasConfig, null, board.canvas);
-  // }, [board, canvasConfig]);
 
   useEffect(() => {
     if (!board?.canvas) {
@@ -202,7 +194,7 @@ const Whiteboard = ({
       fabric.Image.fromURL(reader.result, (img) => {
         img.scaleToHeight(board.canvas.height);
         board.canvas.add(img);
-        board.saveCanvasState();
+        board.saveCanvasHistoryState();
       });
     });
 
@@ -271,8 +263,6 @@ const Whiteboard = ({
       },
     };
     setCanvasObjectsPerPage(newValue);
-    console.log({ newValue });
-    onSaveCanvasState(newValue);
   }
 
   function changeBrushWidth(e) {
@@ -335,7 +325,6 @@ const Whiteboard = ({
       setDocuments((prev) => new Map(prev.set(file.name, file)));
       onPDFUploaded(file, event, board.canvas);
     }
-    board.saveCanvasState();
   }
 
   function getPageJSON({ fileName, pageNumber }) {
@@ -354,9 +343,10 @@ const Whiteboard = ({
 
   const handlePageChange = (page) => {
     saveCanvasState();
-    board.clearCanvas(board.canvas);
+    board.clearCanvas(false);
     setFileReaderInfo({ ...fileReaderInfo, currentPageNumber: page });
     onPageChange({ ...fileReaderInfo, currentPageNumber: page }, null, board.canvas);
+    board.setCurrentPage(page)
   };
 
   const changeDocument = (name) => {
