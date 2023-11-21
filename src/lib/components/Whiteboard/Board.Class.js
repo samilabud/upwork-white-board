@@ -34,8 +34,9 @@ export class Board {
   limitScale = 10;
   sketchWidthLimit = 1920 * this.limitScale;
   sketchHeightLimit = 1080 * this.limitScale;
+  currentPage = 0;
   canvasState = [];
-  currentState = -1;
+  currentState = [];
 
   constructor(params) {
     // [Sketch range limits]
@@ -70,8 +71,8 @@ export class Board {
     this.resetZoom();
     this.setDrawingMode(this.drawingSettings.currentMode);
     this.addZoomListeners();
-    this.canvasState = [];
-    this.currentState = -1;
+    this.canvasState[this.currentPage] = [];
+    this.currentState[this.currentPage] = -1;
   }
 
   initCanvas() {
@@ -117,7 +118,6 @@ export class Board {
 
     this.saveCanvasState();
     this.canvas.requestRenderAll();
-    console.log(this.canvas.getObjects());
     this.canvas.fire('config:change');
   }
 
@@ -722,7 +722,7 @@ export class Board {
     canvas.hoverCursor = 'all-scroll';
   }
 
-  clearCanvas() {
+  clearCanvas(saveHistory = true) {
     const canvas = this.canvas;
     canvas.getObjects().forEach(function (item) {
       if (item !== canvas.backgroundImage) {
@@ -730,7 +730,9 @@ export class Board {
       }
     });
     canvas.setBackgroundImage(null, canvas.renderAll.bind(canvas));
-    this.saveCanvasState();
+    if (saveHistory) {
+      this.saveCanvasState();
+    }
   }
 
   changeZoom({ point, scale }) {
@@ -769,6 +771,10 @@ export class Board {
   onZoom(params) {
     this.addZoomListeners(params);
     this.canvas.fire('zoom:change', params);
+  }
+
+  setCurrentPage(pageNumber) {
+    this.currentPage = pageNumber - 1;
   }
 
   openPage(page) {
@@ -828,16 +834,26 @@ export class Board {
   }
 
   saveCanvasState() {
-    this.currentState++;
-    this.canvasState[this.currentState] = JSON.stringify(this.canvas);
-    this.canvasState = this.canvasState.slice(0, this.currentState + 1);
+    let currentLocalState = this.currentState[this.currentPage] || 0;
+    currentLocalState++;
+    this.currentState[this.currentPage] = currentLocalState;
+    if (!this.canvasState[this.currentPage]) {
+      this.canvasState[this.currentPage] = [];
+    }
+    this.canvasState[this.currentPage][currentLocalState] = JSON.stringify(this.canvas);
+    this.canvasState[this.currentPage] = this.canvasState[this.currentPage].slice(
+      0,
+      currentLocalState + 1,
+    );
   }
 
   undo() {
-    if (this.currentState > 0) {
-      this.currentState--;
+    let currentLocalState = this.currentState[this.currentPage];
+    if (currentLocalState > 0) {
+      currentLocalState--;
+      this.currentState[this.currentPage] = currentLocalState;
       this.canvas.loadFromJSON(
-        this.canvasState[this.currentState],
+        this.canvasState[this.currentPage][currentLocalState],
         this.canvas.renderAll.bind(this.canvas),
       );
       this.canvas.requestRenderAll();
@@ -845,10 +861,12 @@ export class Board {
   }
 
   redo() {
-    if (this.currentState < this.canvasState.length - 1) {
-      this.currentState++;
+    let currentLocalState = this.currentState[this.currentPage];
+    if (currentLocalState < this.canvasState[this.currentPage].length - 1) {
+      currentLocalState++;
+      this.currentState[this.currentPage] = currentLocalState;
       this.canvas.loadFromJSON(
-        this.canvasState[this.currentState],
+        this.canvasState[this.currentPage][currentLocalState],
         this.canvas.renderAll.bind(this.canvas),
       );
       this.canvas.requestRenderAll();
