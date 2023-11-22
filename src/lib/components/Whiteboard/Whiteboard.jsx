@@ -320,7 +320,7 @@ const Whiteboard = ({
       onImageUploaded(file, event, board.canvas);
     } else if (file.type.includes('pdf')) {
       saveCanvasState();
-      board.clearCanvas();
+      board.clearCanvas(false);
       updateFileReaderInfo({ file: file, currentPageNumber: 1 });
       setDocuments((prev) => new Map(prev.set(file.name, file)));
       onPDFUploaded(file, event, board.canvas);
@@ -339,6 +339,8 @@ const Whiteboard = ({
     const newFileData = { ...fileReaderInfo, ...data };
     setFileReaderInfo(newFileData);
     onPDFUpdated(newFileData, null, board.canvas);
+    const {file:{name='default'}} = newFileData;
+    board.setDocumentName(name)
   }
 
   const handlePageChange = (page) => {
@@ -352,9 +354,12 @@ const Whiteboard = ({
   const changeDocument = (name) => {
     bringControlTOStartPosition();
     saveCanvasState();
-    board.clearCanvas(board.canvas);
+    board.clearCanvas(false);
     setFileReaderInfo({ file: documents.get(name), currentPageNumber: 1 });
     onDocumentChanged({ file: documents.get(name), currentPageNumber: 1 }, null, board.canvas);
+
+    board.setDocumentName(name)
+    board.setCurrentPage(1)
   };
 
   const handleZoomIn = () => {

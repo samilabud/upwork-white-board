@@ -20,13 +20,7 @@ const App = () => {
       <GlobalStyle />
       <AppS>
         <MainS>
-          <Whiteboard
-            settings={settings}
-            onCanvasRender={(data) => {
-              // console.log('onCanvasRender', data);
-              // console.log('JSON', JSON.stringify(data.settings.contentJSON));
-            }}
-          />
+          <Whiteboard settings={settings} onCanvasRender={(data) => {}} />
         </MainS>
       </AppS>
     </>
