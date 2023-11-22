@@ -1,15 +1,32 @@
-"use strict";
+'use strict';
 
 exports.__esModule = true;
 exports.modes = exports.Board = void 0;
 
-var _fabric = require("fabric");
+var _fabric = require('fabric');
 
-var _cursors = require("./cursors");
+var _cursors = require('./cursors');
 
-function _readOnlyError(name) { throw new TypeError("\"" + name + "\" is read-only"); }
+function _readOnlyError(name) {
+  throw new TypeError('"' + name + '" is read-only');
+}
 
-function _extends() { _extends = Object.assign ? Object.assign.bind() : function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+function _extends() {
+  _extends = Object.assign
+    ? Object.assign.bind()
+    : function (target) {
+        for (var i = 1; i < arguments.length; i++) {
+          var source = arguments[i];
+          for (var key in source) {
+            if (Object.prototype.hasOwnProperty.call(source, key)) {
+              target[key] = source[key];
+            }
+          }
+        }
+        return target;
+      };
+  return _extends.apply(this, arguments);
+}
 
 var modes = {
   PENCIL: 'PENCIL',
@@ -19,11 +36,11 @@ var modes = {
   ELLIPSE: 'ELLIPSE',
   ERASER: 'ERASER',
   SELECT: 'SELECT',
-  TEXT: 'TEXT'
+  TEXT: 'TEXT',
 };
 exports.modes = modes;
 
-var Board = /*#__PURE__*/function () {
+var Board = /*#__PURE__*/ (function () {
   function Board(params) {
     var _this = this;
 
@@ -38,7 +55,7 @@ var Board = /*#__PURE__*/function () {
       contentJSON: null,
       minZoom: 0.05,
       maxZoom: 9.99,
-      viewportTransform: [1, 0, 0, 1, 0, 0]
+      viewportTransform: [1, 0, 0, 1, 0, 0],
     };
 
     if (params) {
@@ -60,7 +77,7 @@ var Board = /*#__PURE__*/function () {
   _proto.initCanvas = function initCanvas() {
     _fabric.fabric.Canvas.prototype.getItemByAttr = function (attr, name) {
       var object = null,
-          objects = this.getObjects();
+        objects = this.getObjects();
 
       for (var i = 0, len = this.size(); i < len; i++) {
         if (objects[i][attr] && objects[i][attr] === name) {
@@ -100,12 +117,11 @@ var Board = /*#__PURE__*/function () {
     if (this.canvasConfig.viewportTransform) {
       this.canvas.viewportTransform = this.canvasConfig.viewportTransform;
       this.changeZoom({
-        scale: 1
+        scale: 1,
       });
     }
 
     this.canvas.requestRenderAll();
-    console.log(this.canvas.getObjects());
     this.canvas.fire('config:chnage');
   };
 
@@ -123,70 +139,46 @@ var Board = /*#__PURE__*/function () {
         var scale = Math.pow(0.995, delta);
         var point = {
           x: opt.e.offsetX,
-          y: opt.e.offsetY
+          y: opt.e.offsetY,
         };
         that.changeZoom({
           point: point,
-          scale: scale
+          scale: scale,
         });
       } else {
         var e = opt.e;
         var vpt = canvas.viewportTransform;
         vpt[4] -= e.deltaX;
-        vpt[5] -= e.deltaY; // const boundaries = that.getCanvasContentBoundaries();
-        // let scrolledX = vpt[4] + e.deltaX;
-        // let scrolledY = vpt[5] + e.deltaY;
-        // console.log('scrolled', scrolledX, scrolledY);
-        // console.log('boundaries', boundaries);
-        // const offset = 50;
-        // scrolledX =
-        //   scrolledX < -boundaries.maxX + offset
-        //     ? -boundaries.maxX + offset
-        //     : -scrolledX < boundaries.minX - canvas.width + offset
-        //     ? canvas.width - boundaries.minX - offset
-        //     : scrolledX;
-        // scrolledY =
-        //   scrolledY < -boundaries.maxY + offset
-        //     ? -boundaries.maxY + offset
-        //     : -scrolledY < boundaries.minY - canvas.height + offset
-        //     ? canvas.height - boundaries.minY - offset
-        //     : scrolledY;
-        // that.throttle(() => console.log('after', scrolledX, scrolledY));
-        // vpt[4] = scrolledX;
-        // vpt[5] = scrolledY;
-        // console.log(vpt);
+        vpt[5] -= e.deltaY;
 
         canvas.requestRenderAll();
       }
     });
     canvas.on('touch:gesture', function (event) {
-      console.log('1 touch:gesture');
-
       if (event.e.touches && event.e.touches.length === 2) {
         var point1 = {
           x: event.e.touches[0].clientX,
-          y: event.e.touches[0].clientY
+          y: event.e.touches[0].clientY,
         };
         var point2 = {
           x: event.e.touches[1].clientX,
-          y: event.e.touches[1].clientY
+          y: event.e.touches[1].clientY,
         };
         var prevDistance = canvas.getPointerDistance(point1, point2);
         canvas.on('touch:gesture', function (event) {
-          console.log('2 touch:gesture');
           var newDistance = canvas.getPointerDistance(point1, point2);
           var zoom = newDistance / prevDistance;
           var point = {
             x: (point1.x + point2.x) / 2,
-            y: (point1.y + point2.y) / 2
+            y: (point1.y + point2.y) / 2,
           };
           var scale = zoom;
           that.changeZoom({
             point: point,
-            scale: scale
+            scale: scale,
           });
           canvas.renderAll();
-          newDistance, _readOnlyError("prevDistance");
+          newDistance, _readOnlyError('prevDistance');
         });
       }
     });
@@ -254,7 +246,7 @@ var Board = /*#__PURE__*/function () {
     canvas.hoverCursor = 'auto';
     canvas.getObjects().map(function (item) {
       return item.set({
-        selectable: false
+        selectable: false,
       });
     });
 
@@ -294,13 +286,13 @@ var Board = /*#__PURE__*/function () {
       var width = whiteboard.clientWidth;
       var height = whiteboard.clientHeight;
       this.changeZoom({
-        scale: 1
+        scale: 1,
       }); // const scale = width / canvas.getWidth();
       // const zoom = canvas.getZoom() * scale;
 
       canvas.setDimensions({
         width: width,
-        height: height
+        height: height,
       }); // canvas.setViewportTransform([zoom, 0, 0, zoom, 0, 0]);
     };
   };
@@ -343,7 +335,7 @@ var Board = /*#__PURE__*/function () {
       this.drawInstance = new _fabric.fabric.Line([pointer.x, pointer.y, pointer.x, pointer.y], {
         strokeWidth: drawingSettings.brushWidth,
         stroke: drawingSettings.currentColor,
-        selectable: false
+        selectable: false,
       });
       canvas.add(this.drawInstance);
       canvas.requestRenderAll();
@@ -359,7 +351,7 @@ var Board = /*#__PURE__*/function () {
         var pointer = canvas.getPointer(e);
         this.drawInstance.set({
           x2: pointer.x,
-          y2: pointer.y
+          y2: pointer.y,
         });
         this.drawInstance.setCoords();
         canvas.requestRenderAll();
@@ -379,7 +371,7 @@ var Board = /*#__PURE__*/function () {
     canvas.isDrawingMode = false;
     canvas.getObjects().map(function (item) {
       return item.set({
-        selectable: false
+        selectable: false,
       });
     });
     canvas.discardActiveObject().requestRenderAll();
@@ -402,14 +394,17 @@ var Board = /*#__PURE__*/function () {
         top: this.origY,
         width: 0,
         height: 0,
-        selectable: false
+        selectable: false,
       });
       canvas.add(this.drawInstance);
-      this.drawInstance.on('mousedown', function (e) {
-        if (drawingSettings.currentMode === this.modes.ERASER) {
-          canvas.remove(e.target);
-        }
-      }.bind(this));
+      this.drawInstance.on(
+        'mousedown',
+        function (e) {
+          if (drawingSettings.currentMode === this.modes.ERASER) {
+            canvas.remove(e.target);
+          }
+        }.bind(this),
+      );
     };
   };
 
@@ -431,7 +426,7 @@ var Board = /*#__PURE__*/function () {
 
         this.drawInstance.set({
           width: Math.abs(pointer.x - this.origX),
-          height: Math.abs(pointer.y - this.origY)
+          height: Math.abs(pointer.y - this.origY),
         });
         this.drawInstance.setCoords();
         canvas.renderAll();
@@ -456,7 +451,7 @@ var Board = /*#__PURE__*/function () {
     canvas.isDrawingMode = false;
     canvas.getObjects().map(function (item) {
       return item.set({
-        selectable: false
+        selectable: false,
       });
     });
     canvas.discardActiveObject().requestRenderAll();
@@ -479,7 +474,7 @@ var Board = /*#__PURE__*/function () {
         top: this.origY,
         cornerSize: 7,
         objectCaching: false,
-        selectable: false
+        selectable: false,
       });
       canvas.add(this.drawInstance);
     };
@@ -503,7 +498,7 @@ var Board = /*#__PURE__*/function () {
 
         this.drawInstance.set({
           rx: Math.abs(pointer.x - this.origX) / 2,
-          ry: Math.abs(pointer.y - this.origY) / 2
+          ry: Math.abs(pointer.y - this.origY) / 2,
         });
         this.drawInstance.setCoords();
         canvas.renderAll();
@@ -523,7 +518,7 @@ var Board = /*#__PURE__*/function () {
     canvas.isDrawingMode = false;
     canvas.getObjects().map(function (item) {
       return item.set({
-        selectable: false
+        selectable: false,
       });
     });
     canvas.discardActiveObject().requestRenderAll();
@@ -547,7 +542,7 @@ var Board = /*#__PURE__*/function () {
         top: this.origY,
         width: 0,
         height: 0,
-        selectable: false
+        selectable: false,
       });
       canvas.add(this.drawInstance);
     };
@@ -571,7 +566,7 @@ var Board = /*#__PURE__*/function () {
 
         this.drawInstance.set({
           width: Math.abs(pointer.x - this.origX),
-          height: Math.abs(pointer.y - this.origY)
+          height: Math.abs(pointer.y - this.origY),
         });
         this.drawInstance.setCoords();
         canvas.renderAll();
@@ -604,27 +599,30 @@ var Board = /*#__PURE__*/function () {
       editable: true,
       perPixelTargetFind: false,
       keysMap: {
-        13: 'exitEditing'
-      }
+        13: 'exitEditing',
+      },
     });
     canvas.add(text);
     canvas.renderAll();
     text.enterEditing();
     this.editedTextObject = text;
     canvas.off('mouse:down');
-    canvas.once('mouse:down', function (e1) {
-      var _this4 = this;
+    canvas.once(
+      'mouse:down',
+      function (e1) {
+        var _this4 = this;
 
-      if (text.isEditing) {
-        text.exitEditing();
-        this.editedTextObject = null;
-        canvas.once('mouse:down', function (e2) {
-          _this4.addText.call(_this4, e2);
-        });
-      } else {
-        this.addText.call(this, e1);
-      }
-    }.bind(this));
+        if (text.isEditing) {
+          text.exitEditing();
+          this.editedTextObject = null;
+          canvas.once('mouse:down', function (e2) {
+            _this4.addText.call(_this4, e2);
+          });
+        } else {
+          this.addText.call(this, e1);
+        }
+      }.bind(this),
+    );
   };
 
   _proto.eraserOn = function eraserOn() {
@@ -641,11 +639,10 @@ var Board = /*#__PURE__*/function () {
     });
     canvas.on('mouse:over', function (event) {
       var hoveredObject = event.target;
-      console.log(hoveredObject);
 
       if (hoveredObject) {
         hoveredObject.set({
-          opacity: 0.2
+          opacity: 0.2,
         });
         canvas.requestRenderAll();
       }
@@ -655,7 +652,7 @@ var Board = /*#__PURE__*/function () {
 
       if (hoveredObject) {
         hoveredObject.set({
-          opacity: 1
+          opacity: 1,
         });
         canvas.requestRenderAll();
       }
@@ -671,7 +668,7 @@ var Board = /*#__PURE__*/function () {
     canvas.isDrawingMode = false;
     canvas.getObjects().map(function (item) {
       return item.set({
-        selectable: true
+        selectable: true,
       });
     });
     canvas.hoverCursor = 'all-scroll';
@@ -689,14 +686,14 @@ var Board = /*#__PURE__*/function () {
 
   _proto.changeZoom = function changeZoom(_ref9) {
     var point = _ref9.point,
-        scale = _ref9.scale;
+      scale = _ref9.scale;
 
     if (!point) {
       var width = this.canvas.width;
       var height = this.canvas.height;
       point = {
         x: width / 2,
-        y: height / 2
+        y: height / 2,
       };
     }
 
@@ -707,7 +704,7 @@ var Board = /*#__PURE__*/function () {
     this.canvas.zoomToPoint(point, scale);
     this.onZoom({
       point: point,
-      scale: scale
+      scale: scale,
     });
   };
 
@@ -716,13 +713,13 @@ var Board = /*#__PURE__*/function () {
     var height = this.canvas.height;
     var point = {
       x: width / 2,
-      y: height / 2
+      y: height / 2,
     };
     var scale = 1;
     this.canvas.zoomToPoint(point, scale);
     this.onZoom({
       point: point,
-      scale: scale
+      scale: scale,
     });
   };
 
@@ -746,7 +743,7 @@ var Board = /*#__PURE__*/function () {
         top: center.top,
         left: center.left,
         originX: 'center',
-        originY: 'center'
+        originY: 'center',
       });
       canvas.renderAll();
     });
@@ -777,7 +774,7 @@ var Board = /*#__PURE__*/function () {
       maxX: maxX,
       maxY: maxY,
       width: width,
-      height: height
+      height: height,
     };
   };
 
@@ -790,7 +787,7 @@ var Board = /*#__PURE__*/function () {
     }
 
     this.canvas = null;
-  } // function drawBackground(canvas) {
+  }; // function drawBackground(canvas) {
   //   const dotSize = 4; // Adjust the size of the dots as needed
   //   const dotSvg = `
   //       <svg xmlns="http://www.w3.org/2000/svg" width="${dotSize * 10}" height="${
@@ -825,9 +822,8 @@ var Board = /*#__PURE__*/function () {
   //     };
   //   });
   // }
-  ;
 
   return Board;
-}();
+})();
 
 exports.Board = Board;

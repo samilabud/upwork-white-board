@@ -22,7 +22,6 @@ const PDFReader = ({ fileReaderInfo, updateFileReaderInfo, onPageChange }) => {
   }
 
   function onDocumentLoadSuccess({ numPages }) {
-    console.log('onDocumentLoadSuccess', numPages);
     updateFileReaderInfo({ totalPages: numPages });
   }
 
