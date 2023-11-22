@@ -116,7 +116,6 @@ export class Board {
       this.changeZoom({ scale: 1 });
     }
 
-    this.saveCanvasState();
     this.canvas.requestRenderAll();
     this.canvas.fire('config:change');
   }
@@ -615,8 +614,6 @@ export class Board {
     canvas.on('mouse:down', (e) => this.addText.call(this, e));
 
     canvas.isDrawingMode = false;
-
-    this.saveCanvasState();
   }
 
   addText(e) {
@@ -657,11 +654,16 @@ export class Board {
           });
         } else {
           this.addText.call(this, e1);
+          console.log('is here???5');
         }
       }.bind(this),
     );
-
-    this.saveCanvasState();
+    canvas.once(
+      'text:editing:exited',
+      function (e1) {
+        this.saveCanvasState();
+      }.bind(this),
+    );
   }
 
   eraserOn() {
