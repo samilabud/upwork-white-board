@@ -34,6 +34,7 @@ export class Board {
   limitScale = 10;
   sketchWidthLimit = 1920 * this.limitScale;
   sketchHeightLimit = 1080 * this.limitScale;
+  currentDocName = 'Whiteboard';
   currentPage = 0;
   canvasState = [];
   currentState = [];
@@ -71,8 +72,10 @@ export class Board {
     this.resetZoom();
     this.setDrawingMode(this.drawingSettings.currentMode);
     this.addZoomListeners();
-    this.canvasState[this.currentPage] = [];
-    this.currentState[this.currentPage] = -1;
+    this.canvasState[this.currentDocName] = [];
+    this.canvasState[this.currentDocName][this.currentPage] = [];
+    this.currentState[this.currentDocName] = [];
+    this.currentState[this.currentDocName][this.currentPage] = -1;
   }
 
   initCanvas() {
@@ -152,35 +155,6 @@ export class Board {
         } catch (error) {
           console.log(error);
         }
-
-        // const boundaries = that.getCanvasContentBoundaries();
-
-        // let scrolledX = vpt[4] + e.deltaX;
-        // let scrolledY = vpt[5] + e.deltaY;
-        // console.log('scrolled', scrolledX, scrolledY);
-        // console.log('boundaries', boundaries);
-
-        // const offset = 50;
-
-        // scrolledX =
-        //   scrolledX < -boundaries.maxX + offset
-        //     ? -boundaries.maxX + offset
-        //     : -scrolledX < boundaries.minX - canvas.width + offset
-        //     ? canvas.width - boundaries.minX - offset
-        //     : scrolledX;
-        // scrolledY =
-        //   scrolledY < -boundaries.maxY + offset
-        //     ? -boundaries.maxY + offset
-        //     : -scrolledY < boundaries.minY - canvas.height + offset
-        //     ? canvas.height - boundaries.minY - offset
-        //     : scrolledY;
-
-        // that.throttle(() => console.log('after', scrolledX, scrolledY));
-
-        // vpt[4] = scrolledX;
-        // vpt[5] = scrolledY;
-
-        // console.log(vpt);
 
         canvas.requestRenderAll();
       }
@@ -654,7 +628,6 @@ export class Board {
           });
         } else {
           this.addText.call(this, e1);
-          console.log('is here???5');
         }
       }.bind(this),
     );
@@ -778,6 +751,9 @@ export class Board {
   setCurrentPage(pageNumber) {
     this.currentPage = pageNumber - 1;
   }
+  setDocumentName(docName) {
+    this.currentDocName = docName;
+  }
 
   openPage(page) {
     const canvas = this.canvas;
@@ -836,26 +812,34 @@ export class Board {
   }
 
   saveCanvasState() {
-    let currentLocalState = this.currentState[this.currentPage] || 0;
+    const localCurrentState = this.currentState[this.currentDocName] || [];
+    let currentLocalState = localCurrentState[this.currentPage] || 0;
     currentLocalState++;
-    this.currentState[this.currentPage] = currentLocalState;
-    if (!this.canvasState[this.currentPage]) {
-      this.canvasState[this.currentPage] = [];
+    localCurrentState[this.currentPage] = currentLocalState;
+    this.currentState[this.currentDocName] = localCurrentState;
+    if (!this.canvasState[this.currentDocName]) {
+      this.canvasState[this.currentDocName] = [];
     }
-    this.canvasState[this.currentPage][currentLocalState] = JSON.stringify(this.canvas);
-    this.canvasState[this.currentPage] = this.canvasState[this.currentPage].slice(
-      0,
-      currentLocalState + 1,
+    if (!this.canvasState[this.currentDocName][this.currentPage]) {
+      this.canvasState[this.currentDocName][this.currentPage] = [];
+    }
+    this.canvasState[this.currentDocName][this.currentPage][currentLocalState] = JSON.stringify(
+      this.canvas,
     );
+    this.canvasState[this.currentDocName][this.currentPage] = this.canvasState[this.currentDocName][
+      this.currentPage
+    ].slice(0, currentLocalState + 1);
   }
 
   undo() {
-    let currentLocalState = this.currentState[this.currentPage];
+    const localCurrentState = this.currentState[this.currentDocName] || [];
+    let currentLocalState = localCurrentState[this.currentPage];
     if (currentLocalState > 0) {
       currentLocalState--;
-      this.currentState[this.currentPage] = currentLocalState;
+      localCurrentState[this.currentPage] = currentLocalState;
+      this.currentState[this.currentDocName] = localCurrentState;
       this.canvas.loadFromJSON(
-        this.canvasState[this.currentPage][currentLocalState],
+        this.canvasState[this.currentDocName][this.currentPage][currentLocalState],
         this.canvas.renderAll.bind(this.canvas),
       );
       this.canvas.requestRenderAll();
@@ -863,12 +847,14 @@ export class Board {
   }
 
   redo() {
-    let currentLocalState = this.currentState[this.currentPage];
-    if (currentLocalState < this.canvasState[this.currentPage].length - 1) {
+    const localCurrentState = this.currentState[this.currentDocName] || [];
+    let currentLocalState = localCurrentState[this.currentPage];
+    if (currentLocalState < this.canvasState[this.currentDocName][this.currentPage].length - 1) {
       currentLocalState++;
-      this.currentState[this.currentPage] = currentLocalState;
+      localCurrentState[this.currentPage] = currentLocalState;
+      this.currentState[this.currentDocName] = localCurrentState;
       this.canvas.loadFromJSON(
-        this.canvasState[this.currentPage][currentLocalState],
+        this.canvasState[this.currentDocName][this.currentPage][currentLocalState],
         this.canvas.renderAll.bind(this.canvas),
       );
       this.canvas.requestRenderAll();

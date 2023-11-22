@@ -339,6 +339,8 @@ const Whiteboard = ({
     const newFileData = { ...fileReaderInfo, ...data };
     setFileReaderInfo(newFileData);
     onPDFUpdated(newFileData, null, board.canvas);
+    const {file:{name='default'}} = newFileData;
+    board.setDocumentName(name)
   }
 
   const handlePageChange = (page) => {
@@ -355,6 +357,9 @@ const Whiteboard = ({
     board.clearCanvas(board.canvas);
     setFileReaderInfo({ file: documents.get(name), currentPageNumber: 1 });
     onDocumentChanged({ file: documents.get(name), currentPageNumber: 1 }, null, board.canvas);
+
+    board.setDocumentName(name)
+    board.setCurrentPage(1)
   };
 
   const handleZoomIn = () => {
