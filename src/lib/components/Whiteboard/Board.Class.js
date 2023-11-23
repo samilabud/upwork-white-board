@@ -773,6 +773,7 @@ export class Board {
       });
 
       canvas.renderAll();
+      this.saveCanvasState();
     });
   }
 
